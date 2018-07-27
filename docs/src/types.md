@@ -91,7 +91,7 @@ end
 
 function rem_vertex!(g::MatrixDiGraph, v)
     n = nv(g)
-    (v < 1) || v > n) && return false
+    (v < 1 || v > n) && return false
     remaining = setdiff(1:n,v)
     g.m = g.m[remaining,remaining]
     return true
@@ -126,14 +126,16 @@ Since our custom type `MatrixDiGraph` is defined on top of this matrix, we can j
 using BenchmarkTools: @btime # used for reliable bencmarks
 import LightGraphs: adjacency_matrix
 
+g = MatrixDiGraph(rand(Bool,500,500))
 # using the default implementation
-@btime adjacency_matrix(bigger_twitter)
-# 3.681 ms (5222 allocations: 682.03 KiB)
+@btime adjacency_matrix(g)
+# 3.268 ms (6155 allocations: 4.66 MiB)
 
-adjacency_matrix(g::MatrixDiGraph) = g.m
+# casting all our elements to Int to comply with the adjacency_matrix implementation
+adjacency_matrix(g::MatrixDiGraph) = Int.(g.m)
 # using our new method
-@btime A = adjacency_matrix(bigger_twitter)
-# 13.047 ns (0 allocations: 0 bytes)
+@btime adjacency_matrix(g)
+# 187.136 μs (2 allocations: 1.91 MiB)
 ```
 
 ## Full Docs for AbstractGraph Functions
